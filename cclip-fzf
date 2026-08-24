@@ -67,7 +67,7 @@ __log () {
 }
 
 # Given that any write by __guard is followed by exit, only one errfile
-# is necessary per script invokation
+# is necessary per script invocation
 if errfile="$(mktemp 2>&1)"; then :; else
     exit_code=$?
     __log FATAL "mktemp exited with code $exit_code:" "$errfile"
