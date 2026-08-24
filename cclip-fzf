@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# vim:set expandtab shiftwidth=4 filetype=bash:
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+#
+#
+# ~chewygumxx/cclip-fzf.git
+# ::: :/cclip-fzf
+#
+#
+
+#
+# Integration of cclip with fzf.
+#
+# Derived from the cclip example picker:
+# https://github.com/heather7283/cclip/tree/master/examples
+#
+
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    printf '%s: must be executed, not sourced\n' "${BASH_SOURCE[0]##*/}" >&2
+    return 1
+fi
+
+if [[ "$1" == "-d" && -n "$2" ]]; then
+    CCLIP_FZF_DB_PATH="$2"
+    shift 2
+fi
+
+: "${CCLIP_FZF_VERBOSE:=0}"
+: "${CCLIP_FZF_PREVIEW_WIDTH:=70}"
+: "${CCLIP_FZF_CONCAT_DELIMITER=$'\n'}" # Can be set to null
+export CCLIP_FZF_DB_PATH="${CCLIP_FZF_DB_PATH:-${XDG_DATA_HOME:-$HOME/.local/share}/cclip/db.sqlite3}"
+
+__this_file="${BASH_SOURCE[0]}"
+
+# --------------------
+# Essential Functions
+# --------------------
+
+__log () {
+    local level="INFO"
+    while true; do
+        case "$1" in
+            INFO)
+                (( CCLIP_FZF_VERBOSE )) || return
+                ;;
+            NOTICE|WARN|ERROR|FATAL)
+                level="$1"
+                ;;
+            *)
+                break ;;
+        esac
+        shift
+    done
+
+    # Trim path from script identifier and escape %
+    local __this_file="${__this_file:-"${BASH_SOURCE[0]}"}"
+    __this_file="${__this_file##*/}"
+    __this_file="${__this_file//%/%%}"
+
+    if (( CTX_PREVIEWER )); then
+        # Print to both stderr and preview window
+        printf "$__this_file: [$level] %s\n" "$@" 2>&1 | tee /dev/stderr
+    else
+        printf "$__this_file: [$level] %s\n" "$@" >&2
+    fi
+}
+
+# Given that any write by __guard is followed by exit, only one errfile
+# is necessary per script invokation
+if errfile="$(mktemp 2>&1)"; then :; else
+    exit_code=$?
+    __log FATAL "mktemp exited with code $exit_code:" "$errfile"
+    exit "$exit_code"
+fi
+trap 'rm -f $errfile' EXIT
+
+__guard() {
+    if "$@" 2>"$errfile"; then :; else
+        exit_code=$?
+        [[ "$1" == "command" ]] && shift
+        __log FATAL "$1 exited with code ${exit_code}:" \
+        "Exec: $*" "$(<"$errfile")"
+        exit "$exit_code"
+    fi
+}
+
+__validate_dependencies() {
+    local dependency_fail=0
+    while (( $# )); do
+        if ! command -v "$1" &>/dev/null; then
+            __log FATAL "Dependency not found in PATH: $1"
+            dependency_fail=1
+        fi
+        shift
+    done
+    (( dependency_fail )) && exit 127
+} 
+
+__cclip() {
+    __guard command cclip -d "$CCLIP_FZF_DB_PATH" "$@"
+}
+
+# ---------
+# Callback
+# ---------
+
+__list() {
+    # Called with: $__this_file --list
+    __cclip list id,mime,preview
+    exit
+}
+
+__delete() {
+    # Called with: $__this_file --delete <ids>
+    while (( $# )); do
+        __cclip delete -s "$1"
+        shift
+    done
+    __list
+}
+
+__copy() {
+    while (( $# )); do
+        __cclip get "$1"
+        (( $# > 1 )) && printf "%s" "$CCLIP_FZF_CONCAT_DELIMITER"
+        shift
+    done | __guard wl-copy
+}
+
+__previewer_image() {
+    __cclip get "$id" | __guard chafa --scale max \
+        --view-size "${CCLIP_FZF_PREVIEW_WIDTH}x${FZF_PREVIEW_LINES}"
+}
+
+__previewer_text() {
+    __cclip get "$id" | __guard awk -v tw="${CCLIP_FZF_PREVIEW_WIDTH}" '
+        length($0) <= tw || tw <= 0 { print; next }
+        {
+            line = $0
+            while (length(line) > tw) {
+                i = tw
+                while (i > 0 && substr(line, i, 1) != " ") i--
+                if (i == 0) i = tw
+                print substr(line, 1, i)
+                line = substr(line, i + 1)
+            }
+            if (length(line) > 0) print line
+        }'
+}
+
+__previewer () {
+    local id mime preview CTX_PREVIEWER=1
+    IFS=$'\t' read -r id mime preview <<< "$1"
+
+    case "$mime" in
+        image/*)
+            __previewer_image ;;
+        text/*)
+            __previewer_text ;;
+        *)
+            printf "%s" "$preview" ;;
+    esac
+    exit
+}
+
+# -----------
+# Main Entry
+# -----------
+
+__main() {
+    __validate_dependencies cclip fzf chafa wl-copy awk
+    # Multi-Select concatenates with newline delimiter
+    local fzf_argv=(
+        --scheme history
+        --reverse
+        --multi 
+        --with-shell="bash -c"
+        --disabled  # No fuzzy finding
+        --no-input
+        --ansi
+
+        --delimiter $'\t'
+        --with-nth 3
+        --track     # Track current selection across reloads
+        --id-nth 1  # Necessary for --track
+
+        # Layout
+        --margin 1
+        --preview "${__this_file@Q} --previewer {}"
+        --preview-window "wrap,right,$CCLIP_FZF_PREVIEW_WIDTH"
+
+        # Keybinds
+        # Selection
+        --bind "p,ctrl-p,k,ctrl-k,up:up"
+        --bind "n,ctrl-n,j,ctrl-j,down:down"
+        --bind "/:enable-search+show-input+unbind(j,k,q,/)"
+        --bind "ctrl-/:toggle-search+toggle-input+toggle-bind(j,k,q,/)"
+
+        # Callback
+        --bind "bs,del,ctrl-d:reload(${__this_file@Q} --delete {+1})"    # Delete
+        --bind "ctrl-r:reload(${__this_file@Q} --list)"       # Reload
+        --bind "enter:become(${__this_file@Q} --copy {+1})"   # Copy
+        
+        # Clean Exit
+        --bind "esc:transform:[[ \$FZF_INPUT_STATE == enabled ]] &&
+                    echo 'hide-input+rebind(j,k,q,/)' ||
+                    echo 'become(true)'
+                "
+        --bind "ctrl-c,ctrl-g,ctrl-q,ctrl-w,q:become(true)"
+    )
+
+    "$__this_file" --list | fzf "${fzf_argv[@]}"
+}
+
+# ---------
+# Dispatch
+# ---------
+
+case "$1" in
+    --list)
+        __list ;;
+    --delete)
+        shift
+        __delete "$@" ;;
+    --copy)
+        shift
+        __copy "$@" ;;
+    --previewer)
+        shift
+        __previewer "$1" ;;
+    *)
+        __main ;;
+esac
