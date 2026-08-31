@@ -16,7 +16,7 @@
     "default_branch": "main",
     "description": "fzf front-end for [cclip](https://github.com/heather7283/cclip) to further assist browse, preview, and restoration of Wayland clipboard history.",
     "category": "script",
-    "topics": [ "bash", "script", "clipboard", "cclip", "fzf", ],
+    "topics": [ "bash", "script", "clipboard", "cclip", "fzf" ],
     "language": "bash",
     "immutable_releases": true,
     "license": {
