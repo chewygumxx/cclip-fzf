@@ -1,4 +1,5 @@
 <!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
 
 <!--
    -
@@ -7,10 +8,15 @@
    -
    -->
 
+<!--
+   - fzf front-end for cclip (https://github.com/heather7283/cclip) to further
+   - assist browse, preview, and restoration of Wayland clipboard history.
+   -->
+
 # cclip-fzf
 
-[`fzf`][fzf] front-end for [`cclip`][cclip] to further assist browse, preview, and
-restoration of Wayland clipboard history.
+[`fzf`][fzf] front-end for [`cclip`][cclip] to further assist browse, preview,
+and restoration of Wayland clipboard history.
 
 Derived from cclip's own [example picker].
 
@@ -53,12 +59,12 @@ Everything is read from the environment, with one CLI override.
 
 ### Environment variables
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `CCLIP_FZF_DB_PATH` | `$XDG_DATA_HOME/cclip/db.sqlite3` (or `~/.local/share/cclip/db.sqlite3`) | Database path passed to every `cclip` call. Matches cclip's own default. |
-| `CCLIP_FZF_VERBOSE` | `0` | Set to `1` to also print `INFO`-level log lines. |
-| `CCLIP_FZF_PREVIEW_WIDTH` | `70` | Column width for the preview pane and the text word-wrap. |
-| `CCLIP_FZF_CONCAT_DELIMITER` | newline | Inserted between entries when a multi-selection is copied at once. Set to an empty string for no separator. |
+| Variable                     | Default                                                                  | Purpose                                                                                                     |
+|------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `CCLIP_FZF_DB_PATH`          | `$XDG_DATA_HOME/cclip/db.sqlite3` (or `~/.local/share/cclip/db.sqlite3`) | Database path passed to every `cclip` call. Matches cclip's own default.                                    |
+| `CCLIP_FZF_VERBOSE`          | `0`                                                                      | Set to `1` to also print `INFO`-level log lines.                                                            |
+| `CCLIP_FZF_PREVIEW_WIDTH`    | `70`                                                                     | Column width for the preview pane and the text word-wrap.                                                   |
+| `CCLIP_FZF_CONCAT_DELIMITER` | newline                                                                  | Inserted between entries when a multi-selection is copied at once. Set to an empty string for no separator. |
 
 ### `-d` flag
 
@@ -70,23 +76,23 @@ Ensure `cclipd` daemon is running before launching the picker (e.g. via
 `exec-once` in Hyprland's config).
 
 Navigation and the query field are keyboard-driven; the query field starts
-hidden so single keys act as controls instead of typing into a
-filter, until you explicitly open search with `/`.
+hidden so single keys act as controls instead of typing into a filter, until
+you explicitly open search with `/`.
 
 ### Keybindings
 
-| Key(s) | Action |
-| --- | --- |
-| `p`, `Ctrl-P`, `k`, `Ctrl-K`, `Up` | move up |
-| `n`, `Ctrl-N`, `j`, `Ctrl-J`, `Down` | move down |
-| `Tab` / `Shift-Tab` | mark / unmark an entry for multi-select |
-| `/` | open the search field (keys then type as search text instead of acting as controls) |
-| `Ctrl-/` | toggle the search field |
-| `Backspace`, `Del`, `Ctrl-D` | delete the selected entry/entries and reload |
-| `Ctrl-R` | reload the list |
-| `Enter` | copy the selected entry/entries to the clipboard and exit |
-| `Esc` | close the search field if it's open, otherwise quit |
-| `Ctrl-C`, `Ctrl-G`, `Ctrl-Q`, `Ctrl-W`, `q` | quit without copying |
+| Key(s)                                      | Action                                                    |
+|---------------------------------------------|-----------------------------------------------------------|
+| `p`, `Ctrl-P`, `k`, `Ctrl-K`, `Up`          | Move up                                                   |
+| `n`, `Ctrl-N`, `j`, `Ctrl-J`, `Down`        | Move down                                                 |
+| `Tab` / `Shift-Tab`                         | Mark / unmark an entry for multi-select                   |
+| `/`                                         | Open the search field (keys then type as search text)     |
+| `Ctrl-/`                                    | Toggle the search field                                   |
+| `Backspace`, `Del`, `Ctrl-D`                | Delete the selected entry/entries and reload              |
+| `Ctrl-R`                                    | Reload the list                                           |
+| `Enter`                                     | Copy the selected entry/entries to the clipboard and exit |
+| `Esc`                                       | Close the search field if it's open, otherwise quit       |
+| `Ctrl-C`, `Ctrl-G`, `Ctrl-Q`, `Ctrl-W`, `q` | Quit without copying                                      |
 
 ### Hyprland example
 
@@ -115,6 +121,6 @@ the environment Hyprland spawns processes with.
 
 Derived from cclip's own [example picker]
 
-[fzf]: <https://github.com/junegunn/fzf>
-[cclip]: <https://github.com/heather7283/cclip>
+[fzf]:            <https://github.com/junegunn/fzf>
+[cclip]:          <https://github.com/heather7283/cclip>
 [example picker]: <https://github.com/heather7283/cclip/tree/master/examples>

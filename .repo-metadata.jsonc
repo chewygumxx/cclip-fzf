@@ -1,0 +1,28 @@
+// vim:set expandtab shiftwidth=4 filetype=jsonc:
+// SPDX-License-Identifier: GPL-3.0-only
+
+//
+//
+// ~chewygumxx/cclip-fzf.git
+// ::: :/.repo-metadata.jsonc
+//
+//
+
+{
+    "$schema": "https://raw.githubusercontent.com/chewygumxx/apply-repo-metadata-jsonc/refs/tags/v2/schema.json",
+    "name":  "cclip-fzf",
+    "owner": "chewygumxx",
+    "slug":  "chewygumxx/cclip-fzf",
+    "default_branch": "main",
+    "description": "fzf front-end for [cclip](https://github.com/heather7283/cclip) to further assist browse, preview, and restoration of Wayland clipboard history.",
+    "category": "script",
+    "topics": [ "bash", "script", "clipboard", "cclip", "fzf", ],
+    "language": "bash",
+    "immutable_releases": true,
+    "license": {
+        "filepath":  "./LICENSE",
+        "spdx_id":   "GPL-3.0-only",
+        "full_name": "GNU General Public License v3.0 only",
+        "url":       "https://spdx.org/licenses/GPL-3.0-only"
+    }
+}
