@@ -1,16 +1,23 @@
-<!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->
-<!-- SPDX-License-Identifier: GPL-3.0-only -->
+---
+ctime: 2026-08-24
+mtime: 2026-10-05
+spdx: GPL-3.0-only
+title: cclip-fzf
+description: >-
+  fzf front-end for cclip (https://github.com/heather7283/cclip) to further
+  assist browse, preview, and restoration of Wayland clipboard history.
+tags:
+  - fzf
+  - cclip
+  - clipboard
+  - wayland
+---
 
 <!--
    -
    - ~chewygumxx/cclip-fzf.git
    - ::: :/README.md
    -
-   -->
-
-<!--
-   - fzf front-end for cclip (https://github.com/heather7283/cclip) to further
-   - assist browse, preview, and restoration of Wayland clipboard history.
    -->
 
 # cclip-fzf
@@ -124,3 +131,5 @@ Derived from cclip's own [example picker]
 [fzf]:            <https://github.com/junegunn/fzf>
 [cclip]:          <https://github.com/heather7283/cclip>
 [example picker]: <https://github.com/heather7283/cclip/tree/master/examples>
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->
